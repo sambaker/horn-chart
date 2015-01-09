@@ -1,0 +1,19 @@
+{
+    "name": "horn-chart",
+    "version": "0.0.0",
+    "description": "A Web Component that displays the notes available on a trumpet or a trombone with optional highlighting of scales etc",
+    "license": "MIT",
+    "main": "dist/horn-chart.html",
+    "keywords": [
+        "polymer",
+        "web-components"
+    ],
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components"
+    ],
+    "dependencies": {
+        "polymer": "Polymer/polymer#^0.5.1"
+    }
+}
