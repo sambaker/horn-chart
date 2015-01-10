@@ -2,18 +2,49 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
 <!-- Define your custom element -->
-<polymer-element name="horn-chart">
+<polymer-element name="horn-chart" attributes="key mode instrument">
 
     <template>
-        <div>This is a chart</div>
+        <style>
+            :host {
+                font-family: Helvetica,Arial,sans-serif;
+                font-size: 2em;
+                font-weight: lighter;
+                box-shadow: 0 1px 5px rgba(0,0,0,.3);
+                background-color: #000000;
+                display: block;
+                color: white;
+                margin: 5px 0px;
+                padding: 10px;
+            }
+        </style>
+        <div>
+            This will be a {{instrument}} chart
+            <template if="{{ key || mode}}">
+                in the key of {{key}} {{mode}}
+            </template>
+        </div>
     </template>
     <script>
         Polymer('horn-chart', {
+            key: undefined,
+
+            mode: undefined,
+
+            instrument: 'trombone',
+
             // Fires when an instance of the element is created
-            created: function() {},
+            created: function() {
+            },
 
             // Fires when the "<polymer-element>" has been fully prepared
-            ready: function() {},
+            ready: function() {
+                if (this.key || this.mode) {
+                    // If either key or mode is declared then both should exist - supply defaults
+                    this.key = (this.key || "c").toLowerCase();
+                    this.mode = (this.mode || "major").toLowerCase();
+                }
+            },
 
             // Fires when the element’s initial set of children and siblings are guaranteed to exist
             domReady: function() {},
