@@ -1,4 +1,4 @@
-function Horn() {
+function Horns() {
     function partial() {
         var p = [];
         for (var i = 0; i < arguments.length; i += 3) {
@@ -164,6 +164,9 @@ function Horn() {
                 });
             })
         })
+
+        // Save reversedPartials
+        instrument.reversedPartials = partials.slice().reverse();
 
         _.each(noteLocations, function(locationsByOctave) {
             _.each(locationsByOctave, function(locationsByNote) {
