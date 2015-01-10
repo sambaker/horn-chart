@@ -8,7 +8,6 @@
         <style>
             :host {
                 font-family: Helvetica,Arial,sans-serif;
-                font-size: 2em;
                 font-weight: lighter;
                 box-shadow: 0 1px 5px rgba(0,0,0,.3);
                 background-color: #000000;
@@ -17,25 +16,61 @@
                 margin: 5px 0px;
                 padding: 10px;
             }
+            * {
+                box-sizing: border-box;
+            }
+
+            .note {
+                position: relative;
+                background-color: #404040;
+                margin: 1px;
+                text-align: center;
+                font-size: 18px;
+                height: 50px;
+                line-height: 50px;
+            }
         </style>
-        <div>
-            This will be a {{instrument}} chart
-            <template if="{{ key || mode}}">
-                in the key of {{key}} {{mode}}
+        This will be a {{instrument}} chart
+        <template if="{{key || mode}}">
+            in the key of {{key}} {{mode}}
+        </template>
+        <div style="height: 500px;">
+            <template repeat="{{partial in horn.reversedPartials}}">
+                <div horizontal layout>
+                    <template repeat="{{position in partial.positions}}">
+                        <div class="note" flex>
+                            {{position.index | indexToNote | musicNote}}
+                        </div>
+                    </template>
+                </div>
             </template>
         </div>
     </template>
+
+    <script src="../bower_components/lodash/dist/lodash.compat.js"></script>
+    <script src="horns.js"></script>
+
     <script>
         Polymer('horn-chart', {
             key: undefined,
 
             mode: undefined,
 
+            horns: new Horns(),
+
             instrument: 'trombone',
 
-            // Fires when an instance of the element is created
-            created: function() {
+            indexToNote: function(value) {
+                var hornNotes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+                return hornNotes[value];
             },
+
+            musicNote: function(value) {
+                return value.replace('b', '♭').replace('#', '♯');
+            },
+
+            // Fires when an instance of the element is created
+            created: function() {},
 
             // Fires when the "<polymer-element>" has been fully prepared
             ready: function() {
@@ -44,10 +79,18 @@
                     this.key = (this.key || "c").toLowerCase();
                     this.mode = (this.mode || "major").toLowerCase();
                 }
+                if (!this.horns.instruments[this.instrument]) {
+                    console.error("The instrument, " + this.instrument + ", is not supported");
+                }
+                this.horn = this.horns.instruments[this.instrument];
+
+                console.log(this.$);
             },
 
             // Fires when the element’s initial set of children and siblings are guaranteed to exist
-            domReady: function() {},
+            domReady: function() {
+
+            },
 
             // Fires when the element was inserted into the document
             attached: function() {},
