@@ -2,7 +2,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
 <!-- Define your custom element -->
-<polymer-element name="horn-chart" attributes="key mode instrument">
+<polymer-element name="horn-chart" attributes="key showScale instrument">
 
     <template>
         <style>
@@ -20,26 +20,51 @@
                 box-sizing: border-box;
             }
 
-            .note {
+            .position {
                 position: relative;
-                background-color: #404040;
+                background-color: #303030;
                 margin: 1px;
+                height: 50px;
+            }
+            .position.alternate {
+                background-color: black;
+            }
+
+            .note {
+                top: 50%;
+                left: 50%;
+                width: 40px;
+                height: 40px;
+                line-height: 40px;
+                border-radius: 20px;
+                margin: -20px 0px 0px -20px;
+                position: absolute;
                 text-align: center;
                 font-size: 18px;
-                height: 50px;
-                line-height: 50px;
+                background-color: #404040;
+            }
+            .alternate .note {
+                background-color: transparent;
+            }
+            .position.selected .note {
+                background-color: green;
+            }
+            .position.alternate.selected .note {
+                background-color: darkgreen;
             }
         </style>
         This will be a {{instrument}} chart
-        <template if="{{key || mode}}">
-            in the key of {{key}} {{mode}}
+        <template if="{{key || showScale}}">
+            in the key of {{key}} {{showScale}}
         </template>
         <div style="height: 500px;">
             <template repeat="{{partial in horn.reversedPartials}}">
                 <div horizontal layout>
                     <template repeat="{{position in partial.positions}}">
-                        <div class="note" flex>
-                            {{position.index | indexToNote | musicNote}}
+                        <div class="position {{ { alternate: position.score < 10, selected: selected(position) } | tokenList }}" flex>
+                            <div class="note">
+                                {{position.index | indexToNote | musicNote}}
+                            </div>
                         </div>
                     </template>
                 </div>
@@ -49,14 +74,19 @@
 
     <script src="../bower_components/lodash/dist/lodash.compat.js"></script>
     <script src="horns.js"></script>
+    <script src="scales.js"></script>
 
     <script>
         Polymer('horn-chart', {
             key: undefined,
 
-            mode: undefined,
+            showScale: undefined,
 
+            scale: undefined,
+
+            // Shared helper singletons
             horns: new Horns(),
+            scales: new Scales(),
 
             instrument: 'trombone',
 
@@ -69,22 +99,38 @@
                 return value.replace('b', '♭').replace('#', '♯');
             },
 
+            selected: function(position) {
+                var selected = false;
+                debugger;
+                _.each(this.selectedNotes, function(n) {
+                    if (n.location.octave == position.octave && n.location.index == position.index) {
+                        selected = true;
+                    }
+                });
+                return selected;
+            },
+
             // Fires when an instance of the element is created
             created: function() {},
 
             // Fires when the "<polymer-element>" has been fully prepared
             ready: function() {
-                if (this.key || this.mode) {
-                    // If either key or mode is declared then both should exist - supply defaults
-                    this.key = (this.key || "c").toLowerCase();
-                    this.mode = (this.mode || "major").toLowerCase();
+                if (this.key || this.showScale) {
+                    // If either key or showScale is declared then both should exist - supply defaults
+                    this.key = (this.key || "c").toUpperCase();
+                    this.showScale = (this.showScale || "major").toLowerCase();
                 }
                 if (!this.horns.instruments[this.instrument]) {
                     console.error("The instrument, " + this.instrument + ", is not supported");
                 }
-                this.horn = this.horns.instruments[this.instrument];
 
-                console.log(this.$);
+                // TODO: Recompute this on property changes
+                this.horn = this.horns.instruments[this.instrument];
+                if (this.key && this.showScale) {
+                    this.scale = this.scales.scale(this.key, this.showScale);
+                    this.selectedNotes = this.horns.createSelection(this.instrument, this.scale);
+                    //console.log("SEL",this.selectedNotes);
+                }
             },
 
             // Fires when the element’s initial set of children and siblings are guaranteed to exist
