@@ -73,8 +73,9 @@
                 It shows the notes available on the trombone in each partial (vertically) at each slide position (left to right).
             </template>
             <template if="{{instrument == 'trumpet'}}">
-                It shows the notes available on the trumpet in each partial (vertically) at each chromatic valve configuration (from open, left, to 3 valves pressed, right). If a key and scale type is specified, the notes from that scale are highlighted.
+                It shows the notes available on the trumpet in each partial (vertically) at each chromatic valve configuration (from open, left, to 3 valves pressed, right).
             </template>
+            If a key and scale type is specified, the notes from that scale are highlighted.
         </header>
         <div style="height: 500px;">
             <template repeat="{{partial in horn.reversedPartials}}">
