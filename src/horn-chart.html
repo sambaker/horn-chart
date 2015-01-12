@@ -20,6 +20,14 @@
                 box-sizing: border-box;
             }
 
+            pre {
+                color: yellow;
+            }
+
+            header {
+                padding-bottom: 12px;
+            }
+
             .position {
                 position: relative;
                 background-color: #303030;
@@ -53,10 +61,21 @@
                 background-color: darkgreen;
             }
         </style>
-        This will be a {{instrument}} chart
-        <template if="{{key || showScale}}">
-            in the key of {{key}} {{showScale}}
-        </template>
+        <header>
+            This is a {{instrument}} chart web component. It can be dropped into a web page with this HTML:
+            <template if="{{key && showScale}}">
+                <pre>&lt;horn-chart instrument="{{instrument}}" key="{{key}}" showScale="{{showScale}}"&gt;<br/>&lt;/horn-chart&gt;</pre>
+            </template>
+            <template if="{{!key || !showScale}}">
+                <pre>&lt;horn-chart instrument="{{instrument}}"&gt;<br/>&lt;/horn-chart&gt;</pre>
+            </template>
+            <template if="{{instrument == 'trombone'}}">
+                It shows the notes available on the trombone in each partial (vertically) at each slide position (left to right).
+            </template>
+            <template if="{{instrument == 'trumpet'}}">
+                It shows the notes available on the trumpet in each partial (vertically) at each chromatic valve configuration (from open, left, to 3 valves pressed, right).
+            </template>
+        </header>
         <div style="height: 500px;">
             <template repeat="{{partial in horn.reversedPartials}}">
                 <div horizontal layout>
