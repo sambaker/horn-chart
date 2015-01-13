@@ -75,6 +75,7 @@
             <template if="{{instrument == 'trumpet'}}">
                 It shows the notes available on the trumpet in each partial (vertically) at each chromatic valve configuration (from open, left, to 3 valves pressed, right).
             </template>
+            If a key and scale type is specified, the notes from that scale are highlighted.
         </header>
         <div style="height: 500px;">
             <template repeat="{{partial in horn.reversedPartials}}">
@@ -120,7 +121,6 @@
 
             selected: function(position) {
                 var selected = false;
-                debugger;
                 _.each(this.selectedNotes, function(n) {
                     if (n.location.octave == position.octave && n.location.index == position.index) {
                         selected = true;
