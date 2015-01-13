@@ -121,7 +121,6 @@
 
             selected: function(position) {
                 var selected = false;
-                debugger;
                 _.each(this.selectedNotes, function(n) {
                     if (n.location.octave == position.octave && n.location.index == position.index) {
                         selected = true;
