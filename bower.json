@@ -1,7 +1,7 @@
 {
     "name": "horn-chart",
-    "version": "0.0.0",
-    "description": "A Web Component that displays the notes available on a trumpet or a trombone with optional highlighting of scales etc",
+    "version": "0.0.2",
+    "description": "A Web Component that displays the notes available on a trumpet or a trombone with optional highlighting of scales",
     "license": "MIT",
     "main": "dist/horn-chart.html",
     "keywords": [
