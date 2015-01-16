@@ -2,7 +2,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
 <!-- Define your custom element -->
-<polymer-element name="horn-chart" attributes="key showScale instrument">
+<polymer-element name="horn-chart" attributes="key showScale instrument scaleLabel">
 
     <template>
         <style>
@@ -58,7 +58,7 @@
                 background-color: green;
             }
             .position.alternate.selected .note {
-                background-color: darkgreen;
+                background-color: #225522;
             }
         </style>
         <header>
@@ -83,7 +83,7 @@
                     <template repeat="{{position in partial.positions}}">
                         <div class="position {{ { alternate: position.score < 10, selected: selected(position) } | tokenList }}" flex>
                             <div class="note">
-                                {{position.index | indexToNote | musicNote}}
+                                {{position | indexRenderer}}
                             </div>
                         </div>
                     </template>
@@ -104,19 +104,22 @@
 
             scale: undefined,
 
+            scaleLabel: 'degrees',
+
             // Shared helper singletons
             horns: new Horns(),
             scales: new Scales(),
 
             instrument: 'trombone',
 
-            indexToNote: function(value) {
-                var hornNotes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
-                return hornNotes[value];
-            },
-
-            musicNote: function(value) {
-                return value.replace('b', '♭').replace('#', '♯');
+            indexRenderer: function(value) {
+                var selected = this.scale && this.scale.byIndex[value.index]
+                if (this.scaleLabel == 'degrees' && selected) {
+                    return this.scale.byIndex[value.index].interval;
+                } else {
+                    var hornNotes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+                    return hornNotes[value.index].replace('b', '♭').replace('#', '♯');
+                }
             },
 
             selected: function(position) {
@@ -134,6 +137,7 @@
 
             // Fires when the "<polymer-element>" has been fully prepared
             ready: function() {
+                this.validateAttribute('scaleLabel');
                 if (this.key || this.showScale) {
                     // If either key or showScale is declared then both should exist - supply defaults
                     this.key = (this.key || "c").toUpperCase();
@@ -164,7 +168,23 @@
             detached: function() {},
 
             // Fires when an attribute was added, removed, or updated
-            attributeChanged: function(attr, oldVal, newVal) {}
+            attributeChanged: function(attr, oldVal, newVal) {
+                this.validateAttribute(attr);
+            },
+
+            error: function(error) {
+                throw "horn-chart error: " + error;
+            },
+
+            validateAttribute: function(attr) {
+                switch (attr) {
+                case 'scaleLabel':
+                    if (['degrees', 'notes'].indexOf(this[attr]) < 0) {
+                        this.error("Invalid value \""+this[attr]+"\" for attribute \""+attr+"\"");
+                    }
+                    break;
+                }
+            }
         });
     </script>
 

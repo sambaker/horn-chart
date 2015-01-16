@@ -2,32 +2,164 @@
 <link rel="import" href="../../polymer/polymer.html">
 
 <!-- Define your custom element -->
-<polymer-element name="horn-chart" attributes="key mode">
+<polymer-element name="horn-chart" attributes="key showScale instrument scaleLabel">
 
     <template>
-        <div>This is a chart in the key of {{key}}</div>
+        <style>
+            :host {
+                font-family: Helvetica,Arial,sans-serif;
+                font-weight: lighter;
+                box-shadow: 0 1px 5px rgba(0,0,0,.3);
+                background-color: #000000;
+                display: block;
+                color: white;
+                margin: 5px 0px;
+                padding: 10px;
+            }
+            * {
+                box-sizing: border-box;
+            }
+
+            pre {
+                color: yellow;
+            }
+
+            header {
+                padding-bottom: 12px;
+            }
+
+            .position {
+                position: relative;
+                background-color: #303030;
+                margin: 1px;
+                height: 50px;
+            }
+            .position.alternate {
+                background-color: black;
+            }
+
+            .note {
+                top: 50%;
+                left: 50%;
+                width: 40px;
+                height: 40px;
+                line-height: 40px;
+                border-radius: 20px;
+                margin: -20px 0px 0px -20px;
+                position: absolute;
+                text-align: center;
+                font-size: 18px;
+                background-color: #404040;
+            }
+            .alternate .note {
+                background-color: transparent;
+            }
+            .position.selected .note {
+                background-color: green;
+            }
+            .position.alternate.selected .note {
+                background-color: #225522;
+            }
+        </style>
+        <header>
+            This is a {{instrument}} chart web component. It can be dropped into a web page with this HTML:
+            <template if="{{key && showScale}}">
+                <pre>&lt;horn-chart instrument="{{instrument}}" key="{{key}}" showScale="{{showScale}}"&gt;<br/>&lt;/horn-chart&gt;</pre>
+            </template>
+            <template if="{{!key || !showScale}}">
+                <pre>&lt;horn-chart instrument="{{instrument}}"&gt;<br/>&lt;/horn-chart&gt;</pre>
+            </template>
+            <template if="{{instrument == 'trombone'}}">
+                It shows the notes available on the trombone in each partial (vertically) at each slide position (left to right).
+            </template>
+            <template if="{{instrument == 'trumpet'}}">
+                It shows the notes available on the trumpet in each partial (vertically) at each chromatic valve configuration (from open, left, to 3 valves pressed, right).
+            </template>
+            If a key and scale type is specified, the notes from that scale are highlighted.
+        </header>
+        <div style="height: 500px;">
+            <template repeat="{{partial in horn.reversedPartials}}">
+                <div horizontal layout>
+                    <template repeat="{{position in partial.positions}}">
+                        <div class="position {{ { alternate: position.score < 10, selected: selected(position) } | tokenList }}" flex>
+                            <div class="note">
+                                {{position | indexRenderer}}
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
     </template>
+
+    <script src="../../lodash/dist/lodash.compat.js"></script>
+    <script src="horns.js"></script>
+    <script src="scales.js"></script>
+
     <script>
         Polymer('horn-chart', {
             key: undefined,
 
-            mode: undefined,
+            showScale: undefined,
 
-            // Fires when an instance of the element is created
-            created: function() {
-                if (this.key || this.mode) {
-                    console.log("XXX")
-                    // If either key or mode is declared then both should exist - supply defaults
-                    this.key = (this.key || "c").toLowerCase();
-                    this.mode = (this.mode || "major").toLowerCase();
+            scale: undefined,
+
+            scaleLabel: 'degrees',
+
+            // Shared helper singletons
+            horns: new Horns(),
+            scales: new Scales(),
+
+            instrument: 'trombone',
+
+            indexRenderer: function(value) {
+                var selected = this.scale && this.scale.byIndex[value.index]
+                if (this.scaleLabel == 'degrees' && selected) {
+                    return this.scale.byIndex[value.index].interval;
+                } else {
+                    var hornNotes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+                    return hornNotes[value.index].replace('b', '♭').replace('#', '♯');
                 }
             },
 
+            selected: function(position) {
+                var selected = false;
+                _.each(this.selectedNotes, function(n) {
+                    if (n.location.octave == position.octave && n.location.index == position.index) {
+                        selected = true;
+                    }
+                });
+                return selected;
+            },
+
+            // Fires when an instance of the element is created
+            created: function() {},
+
             // Fires when the "<polymer-element>" has been fully prepared
-            ready: function() {},
+            ready: function() {
+                this.validateAttribute('scaleLabel');
+                if (this.key || this.showScale) {
+                    // If either key or showScale is declared then both should exist - supply defaults
+                    this.key = (this.key || "c").toUpperCase();
+                    this.showScale = (this.showScale || "major").toLowerCase();
+                }
+                if (!this.horns.instruments[this.instrument]) {
+                    console.error("The instrument, " + this.instrument + ", is not supported");
+                }
+
+                // TODO: Recompute this on property changes
+                this.horn = this.horns.instruments[this.instrument];
+                if (this.key && this.showScale) {
+                    this.scale = this.scales.scale(this.key, this.showScale);
+                    this.selectedNotes = this.horns.createSelection(this.instrument, this.scale);
+                    //console.log("SEL",this.selectedNotes);
+                }
+            },
 
             // Fires when the element’s initial set of children and siblings are guaranteed to exist
-            domReady: function() {},
+            domReady: function() {
+
+            },
 
             // Fires when the element was inserted into the document
             attached: function() {},
@@ -36,7 +168,23 @@
             detached: function() {},
 
             // Fires when an attribute was added, removed, or updated
-            attributeChanged: function(attr, oldVal, newVal) {}
+            attributeChanged: function(attr, oldVal, newVal) {
+                this.validateAttribute(attr);
+            },
+
+            error: function(error) {
+                throw "horn-chart error: " + error;
+            },
+
+            validateAttribute: function(attr) {
+                switch (attr) {
+                case 'scaleLabel':
+                    if (['degrees', 'notes'].indexOf(this[attr]) < 0) {
+                        this.error("Invalid value \""+this[attr]+"\" for attribute \""+attr+"\"");
+                    }
+                    break;
+                }
+            }
         });
     </script>
 
