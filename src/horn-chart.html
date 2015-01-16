@@ -2,7 +2,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 
 <!-- Define your custom element -->
-<polymer-element name="horn-chart" attributes="key showScale instrument scaleLabel">
+<polymer-element name="horn-chart" attributes="key showScale instrument scaleLabel info">
 
     <template>
         <style>
@@ -61,23 +61,25 @@
                 background-color: #225522;
             }
         </style>
-        <header>
-            This is a {{instrument}} chart web component. It can be dropped into a web page with this HTML:
-            <template if="{{key && showScale}}">
-                <pre>&lt;horn-chart instrument="{{instrument}}" key="{{key}}" showScale="{{showScale}}"&gt;<br/>&lt;/horn-chart&gt;</pre>
-            </template>
-            <template if="{{!key || !showScale}}">
-                <pre>&lt;horn-chart instrument="{{instrument}}"&gt;<br/>&lt;/horn-chart&gt;</pre>
-            </template>
-            <template if="{{instrument == 'trombone'}}">
-                It shows the notes available on the trombone in each partial (vertically) at each slide position (left to right).
-            </template>
-            <template if="{{instrument == 'trumpet'}}">
-                It shows the notes available on the trumpet in each partial (vertically) at each chromatic valve configuration (from open, left, to 3 valves pressed, right).
-            </template>
-            If a key and scale type is specified, the notes from that scale are highlighted.
-        </header>
-        <div style="height: 500px;">
+        <template if="{{info}}">
+            <header>
+                This is a {{instrument}} chart web component. It can be dropped into a web page with this HTML:
+                <template if="{{key && showScale}}">
+                    <pre>&lt;horn-chart instrument="{{instrument}}" key="{{key}}" showScale="{{showScale}}" info="true"&gt;<br/>&lt;/horn-chart&gt;</pre>
+                </template>
+                <template if="{{!key || !showScale}}">
+                    <pre>&lt;horn-chart instrument="{{instrument}}" info="true"&gt;<br/>&lt;/horn-chart&gt;</pre>
+                </template>
+                <template if="{{instrument == 'trombone'}}">
+                    It shows the notes available on the trombone in each partial (vertically) at each slide position (left to right).
+                </template>
+                <template if="{{instrument == 'trumpet'}}">
+                    It shows the notes available on the trumpet in each partial (vertically) at each chromatic valve configuration (from open, left, to 3 valves pressed, right).
+                </template>
+                If a key and scale type is specified, the notes from that scale are highlighted.
+            </header>
+        </template>
+        <div>
             <template repeat="{{partial in horn.reversedPartials}}">
                 <div horizontal layout>
                     <template repeat="{{position in partial.positions}}">
