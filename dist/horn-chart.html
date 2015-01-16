@@ -68,7 +68,7 @@
                 color: black;
             }
         </style>
-        <template if="{{info}}">
+        <template if="{{info == 'true'}}">
             <header>
                 This is a {{instrument}} chart web component. It can be dropped into a web page with this HTML:
                 <template if="{{key && showScale}}">
@@ -161,7 +161,7 @@
                     this.showScale = (this.showScale || "major").toLowerCase();
                 }
                 if (!this.horns.instruments[this.instrument]) {
-                    console.error("The instrument, " + this.instrument + ", is not supported");
+                    this.error("The instrument, " + this.instrument + ", is not supported");
                 }
 
                 // TODO: Recompute this on property changes
@@ -169,7 +169,6 @@
                 if (this.key && this.showScale) {
                     this.scale = this.scales.scale(this.key, this.showScale);
                     this.selectedNotes = this.horns.createSelection(this.instrument, this.scale);
-                    //console.log("SEL",this.selectedNotes);
                 }
             },
 
