@@ -21,7 +21,7 @@
             }
 
             pre {
-                color: yellow;
+                color: #CCCC51;
             }
 
             header {
@@ -35,7 +35,7 @@
                 height: 50px;
             }
             .position.alternate {
-                background-color: black;
+                background-color: #202020;
             }
 
             .note {
@@ -49,16 +49,23 @@
                 position: absolute;
                 text-align: center;
                 font-size: 18px;
-                background-color: #404040;
+                background-color: #707070;
+                color: black;
             }
             .alternate .note {
                 background-color: transparent;
-            }
-            .position.selected .note {
-                background-color: green;
+                color: #666;
             }
             .position.alternate.selected .note {
-                background-color: #225522;
+                opacity: 0.5;
+            }
+            .position.selected .note {
+                background-color: #FED833;
+                color: black;
+            }
+            .position.selected .note.scale-interval-i {
+                background-color: #F57E20;
+                color: black;
             }
         </style>
         <template if="{{info}}">
@@ -84,7 +91,7 @@
                 <div horizontal layout>
                     <template repeat="{{position in partial.positions}}">
                         <div class="position {{ { alternate: position.score < 10, selected: selected(position) } | tokenList }}" flex>
-                            <div class="note">
+                            <div class="note {{position | scaleClass}}">
                                 {{position | indexRenderer}}
                             </div>
                         </div>
@@ -122,6 +129,14 @@
                     var hornNotes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
                     return hornNotes[value.index].replace('b', '♭').replace('#', '♯');
                 }
+            },
+
+            scaleClass: function(value) {
+                var selected = this.scale && this.scale.byIndex[value.index]
+                if (selected) {
+                    return "scale-interval-"+selected.interval.toLowerCase();
+                }
+                return "";
             },
 
             selected: function(position) {
