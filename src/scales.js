@@ -110,9 +110,12 @@ function Scales() {
 
     function keyNotes(key, scale) {
         var result = [];
+        result.byIndex = {};
         _.each(scale.notes, function(note) {
-            result.push(keyNote(key, note, scale.nonsequential));
-        })
+            var kn = keyNote(key, note, scale.nonsequential);
+            result.push(kn);
+            result.byIndex[kn.index] = kn;
+        });
         return result;
     }
 
